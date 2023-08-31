@@ -14,16 +14,46 @@ const [popular, setPopular] = useState([]);
 
     
     const getPopular = async () => {
-        const api = await fetch(`https://api.spoonacular.com/recipes/random?apiKey=${process.env.REACT_APP_API_KEY}&number=9`);
-        const data = await api.json();
-        setPopular(data.recipes);
+        try {
+            const check = localStorage.getItem('popular');
+            if (check) {
+                const parsedCheck = JSON.parse(check);
+                if (Array.isArray(parsedCheck)) {
+                    setPopular(parsedCheck);
+                    console.log(parsedCheck);
+                    return;
+                }
+            }
+    
+            const response = await fetch(`https://api.spoonacular.com/recipes/random?apiKey=${process.env.REACT_APP_API_KEY}&number=9`);
+            
+            if (!response.ok) {
+                throw new Error("Failed to fetch data from API");
+            }
+    
+            const data = await response.json();
+    
+            if (Array.isArray(data.recipes)) {
+                localStorage.setItem("popular", JSON.stringify(data.recipes));
+                setPopular(data.recipes);
+                console.log(data.recipes);
+            } else {
+                throw new Error("Unexpected data format from API");
+            }
+            
+        } catch (error) {
+            console.error("An error occurred:", error);
+        }
     };
+
+
 
   return (
     <div>
         <Wrapper>
             <h3>Popular Picks</h3>
-            <Splide options={{
+            <Splide 
+            options={{
                 perPage:4,
                 arrows: false,
                 pagination: false,
@@ -33,13 +63,13 @@ const [popular, setPopular] = useState([]);
             >   
                     {popular.map((recipe) => {
                         return(
-                         <SplideSlide>
-                            <Card key={recipe.id}>
-                                <p>{recipe.title}</p>
-                                <img src={recipe.image} alt={recipe.title}/>
-                                <Gradient />
-                            </Card>
-                         </SplideSlide>
+                            <SplideSlide key={recipe.id}>
+                                <Card >
+                                    <p>{recipe.title}</p>
+                                    <img src={recipe.image} alt={recipe.title}/>
+                                    <Gradient />
+                                </Card>
+                            </SplideSlide>
                         );
                     })}
             </Splide>
@@ -94,4 +124,4 @@ height: 100%,
 background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.5));
 `;
 
-export default Popular
+export default Popular;
