@@ -5,25 +5,67 @@ import "@splidejs/splide/dist/css/splide.min.css";
 
 
 function Veggie() {
+  const [veggie, setVeggie] = useState([]);
+
+    useEffect(() => {
+        getVeggie();
+    }, []);
+
+    
+    const getVeggie = async () => {
+        try {
+            const check = localStorage.getItem('veggie');
+            if (check) {
+                const parsedCheck = JSON.parse(check);
+                if (Array.isArray(parsedCheck)) {
+                    setVeggie(parsedCheck);
+                    console.log(parsedCheck);
+                    return;
+                }
+            }
+    
+            const response = await fetch(`https://api.spoonacular.com/recipes/random?apiKey=${process.env.REACT_APP_API_KEY}&number=9&tags=vegetarian`);
+            
+            if (!response.ok) {
+                throw new Error("Failed to fetch data from API");
+            }
+    
+            const data = await response.json();
+    
+            if (Array.isArray(data.recipes)) {
+                localStorage.setItem("veggie", JSON.stringify(data.recipes));
+                setVeggie(data.recipes);
+                console.log(data.recipes);
+            } else {
+                throw new Error("Unexpected data format from API");
+            }
+            
+        } catch (error) {
+            console.error("An error occurred:", error);
+        }
+    };
+
+    const baseImageUrl = 'https://spoonacular.com/recipeImages/';
+
   return (
       <div>
         <Wrapper>
-            <h3>Popular Picks</h3>
+            <h3>Our Vegetarian Picks</h3>
             <Splide 
             options={{
-                perPage:4,
+                perPage:3,
                 arrows: false,
                 pagination: false,
                 drag: 'free',
                 gap: '5 rem',
             }}
             >   
-                    {popular.map((recipe) => {
+                    {veggie.map((recipe) => {
                         return(
                             <SplideSlide key={recipe.id}>
                                 <Card >
                                     <p>{recipe.title}</p>
-                                    <img src={recipe.image} alt={recipe.title}/>
+                                    <img src={`${baseImageUrl}${recipe.id}-556x370.jpg`} alt={recipe.title}/>
                                     <Gradient />
                                 </Card>
                             </SplideSlide>
@@ -71,6 +113,13 @@ p{
     justify-content: center;
     align-items: center;
 }
+`;
+const Gradient = styled.div`
+z-index: 3;
+position: absolute;
+width: 100%, 
+height: 100%,
+background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.5));
 `;
 
 export default Veggie
