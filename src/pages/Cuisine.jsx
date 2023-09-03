@@ -33,12 +33,12 @@ function Cuisine() {
         <Grid>
             {cuisine.map((item) => {
                 return (
-                    <Link to='/recipe'>
                         <Card key={item.id}>
-                            <img src={item.image} alt={item.title} />
-                            <h4>{item.title}</h4>
+                            <Link to={'/recipe/' + item.id}>
+                                <img src={item.image} alt={item.title} />
+                                <h4>{item.title}</h4>
+                            </Link>
                         </Card>
-                    </Link>
                 );
             })}
         </Grid>
