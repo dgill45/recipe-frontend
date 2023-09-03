@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import styled from 'styled-components';
 import { useParams } from "react-router-dom";
 
@@ -8,7 +8,7 @@ function Recipe() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('ingredients');
 
-  const fetchDetails = async () => {
+  const fetchDetails = useCallback(async () => {
     try {
       setLoading(true);
       const data = await fetch(
@@ -21,11 +21,11 @@ function Recipe() {
       console.error("Failed to fetch data:", error);
       setLoading(false);
     }
-  };
+  }, [params.name]);
 
    useEffect(() => {
     fetchDetails();
-  }, [params.name]);
+  }, [fetchDetails]);
 
   if (loading) {
     return <p>Loading...</p>;
